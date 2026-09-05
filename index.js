@@ -115,9 +115,11 @@ async function checkRegistration(telegramId) {
 function registrationButtons(telegramId) {
   return Markup.inlineKeyboard([
     [
-      Markup.button.webApp(
+      Markup.button.url(
   "📝 ЗАРЕЄСТРУВАТИСЯ",
-  MINI_APP_URL
+  `${MINI_APP_URL}/?telegram_id=${ctx.from.id}&register=1`
+),
+
 ),
 
     ],
@@ -181,10 +183,11 @@ bot.action("check_registration", async (ctx) => {
 🚀 Тепер тобі доступний POCKET INSIDER.`,
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        ),
+        Markup.button.webApp(
+  "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+  MINI_APP_URL
+)
+
       ],
     ])
   );
