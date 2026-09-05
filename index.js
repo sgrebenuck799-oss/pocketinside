@@ -130,6 +130,21 @@ function registrationButtons(telegramId) {
 }
 
 // =========================================
+// КНОПКА MINI APP
+// =========================================
+
+function terminalButton() {
+  return Markup.inlineKeyboard([
+    [
+      Markup.button.webApp(
+        "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+        MINI_APP_URL
+      ),
+    ],
+  ]);
+}
+
+// =========================================
 // START
 // =========================================
 
@@ -178,14 +193,7 @@ bot.action("check_registration", async (ctx) => {
     `✅ ДОСТУП ПІДТВЕРДЖЕНО!
 
 🚀 Тепер тобі доступний POCKET INSIDER.`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        ),
-      ],
-    ])
+    terminalButton()
   );
 });
 
@@ -210,14 +218,7 @@ bot.action("open_terminal", async (ctx) => {
 
   await ctx.reply(
     "🚀 Відкривай POCKET INSIDER:",
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        ),
-      ],
-    ])
+    terminalButton()
   );
 });
 
@@ -240,14 +241,7 @@ bot.command("terminal", async (ctx) => {
 
   await ctx.reply(
     "🚀 POCKET INSIDER готовий:",
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        ),
-      ],
-    ])
+    terminalButton()
   );
 });
 
@@ -291,3 +285,4 @@ process.once("SIGINT", () =>
 
 process.once("SIGTERM", () =>
   bot.stop("SIGTERM")
+);
