@@ -6,6 +6,9 @@ const http = require("http");
 // =========================================
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const ADMIN_IDS = [
+  "858491771"
+];
 
 const API_URL =
   "https://pocketinside-api.sgrebenuck-799.workers.dev";
