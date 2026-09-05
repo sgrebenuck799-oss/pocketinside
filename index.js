@@ -69,8 +69,15 @@ function getRegistrationUrl(telegramId) {
 // =========================================
 // ПЕРЕВІРКА ДОСТУПУ
 // =========================================
+function isAdmin(telegramId) {
+  return ADMIN_IDS.includes(String(telegramId));
+} 
 
 async function checkRegistration(telegramId) {
+  if (isAdmin(telegramId)) {
+  return true;
+    
+}
   try {
     const response = await fetch(
       `${API_URL}/api/check?telegram_id=${encodeURIComponent(
