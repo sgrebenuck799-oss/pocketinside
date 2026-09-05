@@ -115,11 +115,9 @@ async function checkRegistration(telegramId) {
 function registrationButtons(telegramId) {
   return Markup.inlineKeyboard([
     [
-      Markup.button.url(
+      Markup.button.webApp(
   "📝 ЗАРЕЄСТРУВАТИСЯ",
-  `${MINI_APP_URL}/?telegram_id=${ctx.from.id}&register=1`
-),
-
+  MINI_APP_URL
 ),
 
     ],
@@ -183,11 +181,10 @@ bot.action("check_registration", async (ctx) => {
 🚀 Тепер тобі доступний POCKET INSIDER.`,
     Markup.inlineKeyboard([
       [
-        Markup.button.webApp(
-  "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-  MINI_APP_URL
-)
-
+        Markup.button.url(
+          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+          MINI_APP_URL
+        ),
       ],
     ])
   );
@@ -216,10 +213,9 @@ bot.action("open_terminal", async (ctx) => {
     "🚀 Відкривай POCKET INSIDER:",
     Markup.inlineKeyboard([
       [
-        Markup.button.webApp(
-  "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-  MINI_APP_URL
-)
+        Markup.button.url(
+          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+          MINI_APP_URL
         ),
       ],
     ])
@@ -247,11 +243,9 @@ bot.command("terminal", async (ctx) => {
     "🚀 POCKET INSIDER готовий:",
     Markup.inlineKeyboard([
       [
-        Markup.button.webApp(
-  "📝 ЗАРЕЄСТРУВАТИСЯ",
-  MINI_APP_URL
-),
-
+        Markup.button.url(
+          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+          MINI_APP_URL
         ),
       ],
     ])
