@@ -10,8 +10,9 @@ const ADMIN_IDS = [
   "858491771"
 ];
 
-const API_URL =
-  "https://pocketinside-api.sgrebenuck-799.workers.dev";
+const MINI_APP_URL =
+  "https://tiny-wind-710a.sgrebenuck-799.workers.dev";
+
 
 // Партнерська реєстрація Pocket Partners
 const REGISTER_URL =
