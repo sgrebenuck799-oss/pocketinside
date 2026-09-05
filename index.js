@@ -3,7 +3,7 @@ const fs = require("fs");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const MINI_APP_URL = "https://pocketinside.pages.dev";
-const REGISTER_URL = "https://pocketinside.pages.dev";
+const REGISTER_URL = "https://u3.shortink.io/register?utm_campaign=844070&utm_source=affiliate&utm_medium=sr&a=AL9nNcVsCGLdY5&al=1755713&ac=pocketinside&cid=953070";
 
 if (!BOT_TOKEN) {
   console.error("❌ BOT_TOKEN не знайдений!");
