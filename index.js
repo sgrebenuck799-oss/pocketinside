@@ -1,9 +1,8 @@
-```javascript
 const { Telegraf, Markup } = require("telegraf");
 const http = require("http");
 
 // =========================================
-// НАСТРОЙКИ
+// НАЛАШТУВАННЯ
 // =========================================
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -15,7 +14,7 @@ const ADMIN_IDS = [
 const API_URL =
   "https://pocketinside-api.sgrebenuck-799.workers.dev";
 
-// Партнерская регистрация Pocket Partners
+// Партнерська реєстрація Pocket Partners
 const REGISTER_URL =
   "https://po-ru4.click/register?utm_campaign=844070&utm_source=affiliate&utm_medium=sr&a=AL9nNcVsCGLdY5&al=1755713&ac=pocketinside&cid=953070";
 
@@ -24,11 +23,11 @@ const MINI_APP_URL =
   "https://tiny-wind-710a.sgrebenuck-799.workers.dev";
 
 // =========================================
-// ПРОВЕРКА ТОКЕНА
+// ПЕРЕВІРКА ТОКЕНА
 // =========================================
 
 if (!BOT_TOKEN) {
-  console.error("❌ BOT_TOKEN не найден!");
+  console.error("❌ BOT_TOKEN не знайдений!");
   process.exit(1);
 }
 
@@ -49,11 +48,11 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`🌐 HTTP server запущен на порту ${PORT}`);
+  console.log(`🌐 HTTP server запущений на порту ${PORT}`);
 });
 
 // =========================================
-// ССЫЛКА НА РЕГИСТРАЦИЮ
+// ПОСИЛАННЯ НА РЕЄСТРАЦІЮ
 // =========================================
 
 function getRegistrationUrl(telegramId) {
@@ -68,7 +67,7 @@ function getRegistrationUrl(telegramId) {
 }
 
 // =========================================
-// ПРОВЕРКА ДОСТУПА
+// ПЕРЕВІРКА ДОСТУПУ
 // =========================================
 
 function isAdmin(telegramId) {
@@ -101,7 +100,7 @@ async function checkRegistration(telegramId) {
     return data.registered === true;
   } catch (error) {
     console.error(
-      "❌ Ошибка проверки:",
+      "❌ Помилка перевірки:",
       error.message
     );
 
@@ -110,20 +109,20 @@ async function checkRegistration(telegramId) {
 }
 
 // =========================================
-// КНОПКИ РЕГИСТРАЦИИ
+// КНОПКИ РЕЄСТРАЦІЇ
 // =========================================
 
 function registrationButtons(telegramId) {
   return Markup.inlineKeyboard([
     [
       Markup.button.url(
-        "📝 ЗАРЕГИСТРИРОВАТЬСЯ",
+        "📝 ЗАРЕЄСТРУВАТИСЯ",
         getRegistrationUrl(telegramId)
       ),
     ],
     [
       Markup.button.callback(
-        "🔄 ПРОВЕРИТЬ ДОСТУП",
+        "🔄 ПЕРЕВІРИТИ ДОСТУП",
         "check_registration"
       ),
     ],
@@ -138,7 +137,7 @@ function terminalButton() {
   return Markup.inlineKeyboard([
     [
       Markup.button.webApp(
-        "⚡ ОТКРЫТЬ ТЕРМИНАЛ",
+        "⚡ ВІДКРИТИ ТЕРМІНАЛ",
         MINI_APP_URL
       ),
     ],
@@ -151,28 +150,28 @@ function terminalButton() {
 
 bot.start(async (ctx) => {
   const name =
-    ctx.from.first_name || "друг";
+    ctx.from.first_name || "друже";
 
   await ctx.reply(
-    `👋 Привет, ${name}!
+    `👋 Привіт, ${name}!
 
 ⚡ POCKET INSIDER
 
-Для доступа к терминалу нужно выполнить условие партнерской программы.
+Для доступу до терміналу потрібно виконати умову партнерської програми.
 
-Нажми «ЗАРЕГИСТРИРОВАТЬСЯ», после чего пройди регистрацию.
+Натисни «ЗАРЕЄСТРУВАТИСЯ», після чого виконай реєстрацію.
 
-Если депозит будет подтвержден партнерской системой, бот автоматически откроет доступ.`,
+Якщо депозит буде підтверджений партнерською системою, бот автоматично відкриє доступ.`,
     registrationButtons(ctx.from.id)
   );
 });
 
 // =========================================
-// ПРОВЕРКА ДОСТУПА
+// ПЕРЕВІРКА ДОСТУПУ
 // =========================================
 
 bot.action("check_registration", async (ctx) => {
-  await ctx.answerCbQuery("Проверяю...");
+  await ctx.answerCbQuery("Перевіряю...");
 
   const telegramId = ctx.from.id;
 
@@ -181,9 +180,9 @@ bot.action("check_registration", async (ctx) => {
 
   if (!registered) {
     await ctx.reply(
-      `⏳ Доступ еще не подтвержден.
+      `⏳ Доступ ще не підтверджено.
 
-Если ты уже выполнил условие, подожди немного и нажми «Проверить доступ» еще раз.`,
+Якщо ти вже виконав умову, зачекай трохи та натисни «Перевірити доступ» ще раз.`,
       registrationButtons(telegramId)
     );
 
@@ -191,15 +190,15 @@ bot.action("check_registration", async (ctx) => {
   }
 
   await ctx.reply(
-    `✅ ДОСТУП ПОДТВЕРЖДЕН!
+    `✅ ДОСТУП ПІДТВЕРДЖЕНО!
 
-🚀 Теперь тебе доступен POCKET INSIDER.`,
+🚀 Тепер тобі доступний POCKET INSIDER.`,
     terminalButton()
   );
 });
 
 // =========================================
-// ОТКРЫТЬ ТЕРМИНАЛ
+// ВІДКРИТИ ТЕРМІНАЛ
 // =========================================
 
 bot.action("open_terminal", async (ctx) => {
@@ -210,7 +209,7 @@ bot.action("open_terminal", async (ctx) => {
 
   if (!registered) {
     await ctx.reply(
-      "🔒 Доступ еще не подтвержден.",
+      "🔒 Доступ ще не підтверджено.",
       registrationButtons(ctx.from.id)
     );
 
@@ -218,7 +217,7 @@ bot.action("open_terminal", async (ctx) => {
   }
 
   await ctx.reply(
-    "🚀 Открывай POCKET INSIDER:",
+    "🚀 Відкривай POCKET INSIDER:",
     terminalButton()
   );
 });
@@ -233,7 +232,7 @@ bot.command("terminal", async (ctx) => {
 
   if (!registered) {
     await ctx.reply(
-      "🔒 Сначала нужно получить доступ.",
+      "🔒 Спочатку потрібно отримати доступ.",
       registrationButtons(ctx.from.id)
     );
 
@@ -241,13 +240,13 @@ bot.command("terminal", async (ctx) => {
   }
 
   await ctx.reply(
-    "🚀 POCKET INSIDER готов:",
+    "🚀 POCKET INSIDER готовий:",
     terminalButton()
   );
 });
 
 // =========================================
-// ОШИБКИ
+// ПОМИЛКИ
 // =========================================
 
 bot.catch((error) => {
@@ -264,12 +263,12 @@ bot.catch((error) => {
 bot.launch()
   .then(() => {
     console.log(
-      "🚀 POCKET INSIDER BOT запущен"
+      "🚀 POCKET INSIDER BOT запущений"
     );
   })
   .catch((error) => {
     console.error(
-      "❌ Не удалось запустить Telegram-бота:",
+      "❌ Не вдалося запустити Telegram-бота:",
       error
     );
 
@@ -277,7 +276,7 @@ bot.launch()
   });
 
 // =========================================
-// КОРРЕКТНОЕ ЗАВЕРШЕНИЕ
+// КОРЕКТНЕ ЗАВЕРШЕННЯ
 // =========================================
 
 process.once("SIGINT", () =>
@@ -287,4 +286,3 @@ process.once("SIGINT", () =>
 process.once("SIGTERM", () =>
   bot.stop("SIGTERM")
 );
-```
