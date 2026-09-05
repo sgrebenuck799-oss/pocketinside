@@ -216,9 +216,10 @@ bot.action("open_terminal", async (ctx) => {
     "🚀 Відкривай POCKET INSIDER:",
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
+        Markup.button.webApp(
+  "⚡ ВІДКРИТИ ТЕРМІНАЛ",
+  MINI_APP_URL
+)
         ),
       ],
     ])
@@ -246,9 +247,11 @@ bot.command("terminal", async (ctx) => {
     "🚀 POCKET INSIDER готовий:",
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
-          "⚡ ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
+        Markup.button.webApp(
+  "📝 ЗАРЕЄСТРУВАТИСЯ",
+  MINI_APP_URL
+),
+
         ),
       ],
     ])
