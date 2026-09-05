@@ -6,13 +6,13 @@ const http = require("http");
 // =========================================
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+
 const ADMIN_IDS = [
   "858491771"
 ];
 
 const API_URL =
   "https://pocketinside-api.sgrebenuck-799.workers.dev";
-
 
 // Партнерська реєстрація Pocket Partners
 const REGISTER_URL =
@@ -58,7 +58,6 @@ server.listen(PORT, "0.0.0.0", () => {
 function getRegistrationUrl(telegramId) {
   const url = new URL(REGISTER_URL);
 
-  // Передаємо Telegram ID у Pocket Partners
   url.searchParams.set(
     "sub_id1",
     String(telegramId)
@@ -70,15 +69,16 @@ function getRegistrationUrl(telegramId) {
 // =========================================
 // ПЕРЕВІРКА ДОСТУПУ
 // =========================================
+
 function isAdmin(telegramId) {
   return ADMIN_IDS.includes(String(telegramId));
-} 
+}
 
 async function checkRegistration(telegramId) {
   if (isAdmin(telegramId)) {
-  return true;
-    
-}
+    return true;
+  }
+
   try {
     const response = await fetch(
       `${API_URL}/api/check?telegram_id=${encodeURIComponent(
@@ -115,11 +115,10 @@ async function checkRegistration(telegramId) {
 function registrationButtons(telegramId) {
   return Markup.inlineKeyboard([
     [
-      Markup.button.webApp(
-  "📝 ЗАРЕЄСТРУВАТИСЯ",
-  MINI_APP_URL
-),
-
+      Markup.button.url(
+        "📝 ЗАРЕЄСТРУВАТИСЯ",
+        getRegistrationUrl(telegramId)
+      ),
     ],
     [
       Markup.button.callback(
@@ -181,7 +180,7 @@ bot.action("check_registration", async (ctx) => {
 🚀 Тепер тобі доступний POCKET INSIDER.`,
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
+        Markup.button.webApp(
           "⚡ ВІДКРИТИ ТЕРМІНАЛ",
           MINI_APP_URL
         ),
@@ -213,7 +212,7 @@ bot.action("open_terminal", async (ctx) => {
     "🚀 Відкривай POCKET INSIDER:",
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
+        Markup.button.webApp(
           "⚡ ВІДКРИТИ ТЕРМІНАЛ",
           MINI_APP_URL
         ),
@@ -243,7 +242,7 @@ bot.command("terminal", async (ctx) => {
     "🚀 POCKET INSIDER готовий:",
     Markup.inlineKeyboard([
       [
-        Markup.button.url(
+        Markup.button.webApp(
           "⚡ ВІДКРИТИ ТЕРМІНАЛ",
           MINI_APP_URL
         ),
@@ -292,4 +291,3 @@ process.once("SIGINT", () =>
 
 process.once("SIGTERM", () =>
   bot.stop("SIGTERM")
-);
