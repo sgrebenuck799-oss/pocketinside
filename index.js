@@ -1,90 +1,118 @@
 const { Telegraf, Markup } = require("telegraf");
-const fs = require("fs");
+const http = require("http");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+
+const API_URL =
+  process.env.API_URL || "https://pocketinside.pages.dev/api";
+
 const MINI_APP_URL = "https://pocketinside.pages.dev";
-const REGISTER_URL = "https://u3.shortink.io/register?utm_campaign=844070&utm_source=affiliate&utm_medium=sr&a=AL9nNcVsCGLdY5&al=1755713&ac=pocketinside&cid=953070";
+const REGISTER_URL = "https://pocketinside.pages.dev/register";
+
+const PORT = process.env.PORT || 10000;
 
 if (!BOT_TOKEN) {
   console.error("❌ BOT_TOKEN не знайдений!");
   process.exit(1);
 }
 
-const bot = new Telegraf(BOT_TOKEN);
+/* =========================================
+   HTTP SERVER ДЛЯ RENDER
+========================================= */
 
-const USERS_FILE = "./users.json";
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "text/plain; charset=utf-8",
+  });
 
-function loadUsers() {
-  try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function saveUsers(users) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
-
-function getUser(userId) {
-  const users = loadUsers();
-
-  if (!users[userId]) {
-    users[userId] = {
-      registered: false,
-      createdAt: new Date().toISOString()
-    };
-
-    saveUsers(users);
-  }
-
-  return users[userId];
-}
-
-/* ================================
-   START
-================================ */
-
-bot.start(async (ctx) => {
-  const userId = ctx.from.id;
-  const user = getUser(userId);
-
-  if (!user.registered) {
-    return ctx.reply(
-      `👋 Вітаємо в POCKET INSIDER!
-
-Для доступу до терміналу необхідно спочатку зареєструватися.
-
-Після реєстрації натисніть кнопку «Я зареєструвався».`,
-      Markup.inlineKeyboard([
-        [
-          Markup.button.url(
-            "🔐 ЗАРЕЄСТРУВАТИСЯ",
-            REGISTER_URL
-          )
-        ],
-        [
-          Markup.button.callback(
-            "✅ Я ЗАРЕЄСТРУВАВСЯ",
-            "check_registration"
-          )
-        ]
-      ])
-    );
-  }
-
-  return showMainMenu(ctx);
+  res.end("POCKET INSIDER BOT is running");
 });
 
-/* ================================
-   MAIN MENU
-================================ */
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`🌐 HTTP server запущений на порту ${PORT}`);
+});
 
-async function showMainMenu(ctx) {
-  return ctx.reply(
+/* =========================================
+   TELEGRAM BOT
+========================================= */
+
+const bot = new Telegraf(BOT_TOKEN);
+
+/* =========================================
+   CHECK REGISTRATION
+========================================= */
+
+async function checkRegistration(telegramId) {
+  try {
+    const response = await fetch(
+      `${API_URL}/check?telegram_id=${encodeURIComponent(
+        telegramId
+      )}`
+    );
+
+    if (!response.ok) {
+      console.error(
+        "❌ API відповів:",
+        response.status
+      );
+
+      return false;
+    }
+
+    const data = await response.json();
+
+    return data.registered === true;
+  } catch (error) {
+    console.error(
+      "❌ Помилка API:",
+      error.message
+    );
+
+    return false;
+  }
+}
+
+/* =========================================
+   REGISTRATION
+========================================= */
+
+async function sendRegistrationMessage(ctx) {
+  await ctx.reply(
+    `👋 Вітаємо в POCKET INSIDER!
+
+🔒 Доступ до терміналу поки закритий.
+
+Спочатку потрібно зареєструватися.
+
+Після завершення реєстрації поверніться сюди та натисніть:
+
+🔄 ПЕРЕВІРИТИ РЕЄСТРАЦІЮ`,
+    Markup.inlineKeyboard([
+      [
+        Markup.button.webApp(
+          "🔐 ЗАРЕЄСТРУВАТИСЯ",
+          REGISTER_URL
+        ),
+      ],
+      [
+        Markup.button.callback(
+          "🔄 ПЕРЕВІРИТИ РЕЄСТРАЦІЮ",
+          "check_registration"
+        ),
+      ],
+    ])
+  );
+}
+
+/* =========================================
+   MAIN MENU
+========================================= */
+
+async function sendMainMenu(ctx) {
+  await ctx.reply(
     `⚡ POCKET INSIDER
 
-Ваш доступ активний.
+✅ Доступ активний.
 
 Оберіть дію:`,
     Markup.inlineKeyboard([
@@ -92,110 +120,137 @@ async function showMainMenu(ctx) {
         Markup.button.webApp(
           "🚀 ВІДКРИТИ ТЕРМІНАЛ",
           MINI_APP_URL
-        )
+        ),
       ],
       [
         Markup.button.callback(
           "📊 МІЙ ПРОФІЛЬ",
           "profile"
-        )
+        ),
       ],
       [
         Markup.button.callback(
           "ℹ️ ІНФОРМАЦІЯ",
           "info"
-        )
-      ]
+        ),
+      ],
     ])
   );
 }
 
-/* ================================
-   REGISTRATION CHECK
-================================ */
+/* =========================================
+   START
+========================================= */
 
-bot.action("check_registration", async (ctx) => {
-  const userId = ctx.from.id;
+bot.start(async (ctx) => {
+  const telegramId = ctx.from.id;
 
-  const users = loadUsers();
+  console.log(
+    `👤 /start від Telegram ID: ${telegramId}`
+  );
 
-  if (!users[userId]) {
-    users[userId] = {
-      registered: false,
-      createdAt: new Date().toISOString()
-    };
+  const registered =
+    await checkRegistration(telegramId);
 
-    saveUsers(users);
+  if (!registered) {
+    return sendRegistrationMessage(ctx);
   }
 
-  /*
-    ПОКИ ЩО ЦЕ ТЕСТОВА ПЕРЕВІРКА.
-
-    Реальну автоматичну перевірку
-    підключимо через сайт/API.
-  */
-
-  users[userId].registered = true;
-
-  saveUsers(users);
-
-  await ctx.answerCbQuery("Реєстрацію підтверджено!");
-
-  await ctx.editMessageText(
-    `✅ Реєстрацію підтверджено!
-
-Доступ до POCKET INSIDER відкритий.`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "🚀 ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        )
-      ],
-      [
-        Markup.button.callback(
-          "📊 МІЙ ПРОФІЛЬ",
-          "profile"
-        )
-      ]
-    ])
-  );
+  return sendMainMenu(ctx);
 });
 
-/* ================================
+/* =========================================
+   CHECK REGISTRATION BUTTON
+========================================= */
+
+bot.action(
+  "check_registration",
+  async (ctx) => {
+    await ctx.answerCbQuery(
+      "Перевіряємо реєстрацію..."
+    );
+
+    const telegramId = ctx.from.id;
+
+    const registered =
+      await checkRegistration(telegramId);
+
+    if (!registered) {
+      return ctx.reply(
+        `❌ Реєстрацію не знайдено.
+
+Завершіть реєстрацію на сайті та спробуйте ще раз.`,
+        Markup.inlineKeyboard([
+          [
+            Markup.button.webApp(
+              "🔐 ЗАРЕЄСТРУВАТИСЯ",
+              REGISTER_URL
+            ),
+          ],
+          [
+            Markup.button.callback(
+              "🔄 ПЕРЕВІРИТИ ЩЕ РАЗ",
+              "check_registration"
+            ),
+          ],
+        ])
+      );
+    }
+
+    return ctx.reply(
+      `✅ Реєстрацію підтверджено!
+
+🎉 Доступ до POCKET INSIDER відкритий.`,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.webApp(
+            "🚀 ВІДКРИТИ ТЕРМІНАЛ",
+            MINI_APP_URL
+          ),
+        ],
+      ])
+    );
+  }
+);
+
+/* =========================================
    PROFILE
-================================ */
+========================================= */
 
 bot.action("profile", async (ctx) => {
-  const userId = ctx.from.id;
-  const user = getUser(userId);
-
   await ctx.answerCbQuery();
+
+  const telegramId = ctx.from.id;
+
+  const registered =
+    await checkRegistration(telegramId);
+
+  if (!registered) {
+    return sendRegistrationMessage(ctx);
+  }
 
   await ctx.reply(
     `📊 МІЙ ПРОФІЛЬ
 
-🆔 Telegram ID: ${userId}
+🆔 Telegram ID:
+${telegramId}
 
 🔐 Статус:
-${user.registered ? "✅ Доступ активний" : "🔒 Доступ заблокований"}
-
-📅 Дата підключення:
-${new Date(user.createdAt).toLocaleDateString("uk-UA")}`,
+✅ Доступ активний`,
     Markup.inlineKeyboard([
       [
         Markup.button.webApp(
           "🚀 ВІДКРИТИ ТЕРМІНАЛ",
           MINI_APP_URL
-        )
-      ]
+        ),
+      ],
     ])
   );
 });
 
-/* ================================
+/* =========================================
    INFO
-================================ */
+========================================= */
 
 bot.action("info", async (ctx) => {
   await ctx.answerCbQuery();
@@ -203,60 +258,69 @@ bot.action("info", async (ctx) => {
   await ctx.reply(
     `ℹ️ POCKET INSIDER
 
-Аналітичний термінал із технічними індикаторами та сигналами.
+Telegram Mini App для аналізу валютних пар та технічних індикаторів.
 
-Для роботи терміналу використовуйте кнопку:
-
-🚀 ВІДКРИТИ ТЕРМІНАЛ`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "🚀 ВІДКРИТИ ТЕРМІНАЛ",
-          MINI_APP_URL
-        )
-      ]
-    ])
+Для використання терміналу потрібен активний доступ.`
   );
 });
 
-/* ================================
-   COMMANDS
-================================ */
+/* =========================================
+   TERMINAL COMMAND
+========================================= */
 
 bot.command("terminal", async (ctx) => {
-  const userId = ctx.from.id;
-  const user = getUser(userId);
+  const telegramId = ctx.from.id;
 
-  if (!user.registered) {
-    return ctx.reply(
-      "🔒 Спочатку необхідно зареєструватися.",
-      Markup.inlineKeyboard([
-        [
-          Markup.button.url(
-            "🔐 ЗАРЕЄСТРУВАТИСЯ",
-            REGISTER_URL
-          )
-        ],
-        [
-          Markup.button.callback(
-            "✅ Я ЗАРЕЄСТРУВАВСЯ",
-            "check_registration"
-          )
-        ]
-      ])
-    );
+  const registered =
+    await checkRegistration(telegramId);
+
+  if (!registered) {
+    return sendRegistrationMessage(ctx);
   }
 
-  return showMainMenu(ctx);
+  return sendMainMenu(ctx);
 });
 
-/* ================================
-   LAUNCH
-================================ */
+/* =========================================
+   ERROR HANDLER
+========================================= */
 
-bot.launch();
+bot.catch((error) => {
+  console.error(
+    "❌ Telegram bot error:",
+    error
+  );
+});
 
-console.log("🚀 POCKET INSIDER BOT запущений");
+/* =========================================
+   START BOT
+========================================= */
 
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+bot.launch()
+  .then(() => {
+    console.log(
+      "🚀 POCKET INSIDER BOT запущений"
+    );
+  })
+  .catch((error) => {
+    console.error(
+      "❌ Не вдалося запустити Telegram бота:",
+      error
+    );
+
+    process.exit(1);
+  });
+
+/* =========================================
+   GRACEFUL SHUTDOWN
+========================================= */
+
+process.once("SIGINT", () => {
+  bot.stop("SIGINT");
+  server.close();
+});
+
+process.once("SIGTERM", () => {
+  bot.stop("SIGTERM");
+  server.close();
+});
