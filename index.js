@@ -115,10 +115,11 @@ async function checkRegistration(telegramId) {
 function registrationButtons(telegramId) {
   return Markup.inlineKeyboard([
     [
-      Markup.button.url(
-        "📝 ЗАРЕЄСТРУВАТИСЯ",
-        getRegistrationUrl(telegramId)
-      ),
+      Markup.button.webApp(
+  "📝 ЗАРЕЄСТРУВАТИСЯ",
+  MINI_APP_URL
+),
+
     ],
     [
       Markup.button.callback(
